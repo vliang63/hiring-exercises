@@ -3,35 +3,39 @@ var Converter = require("csvtojson").Converter;
 var json2csv = require('json2csv');
 
 fs.readdir('../grouping', function(err, files){
-	for(var i = 0; i < files.length; i++){
+	for(var i = 0; i < files.length - 1; i++){
 		if(files[i].split(".")[1] === "csv"){
-	    findDups(files[i]);
+	    findDups(files[i], "same_phone");
 	  }
 	}
 });
 
-function findDups(file, matchingIdentifier){
-	var fileStream = fs.createReadStream("../grouping/"+file);
+function findDups(file, matcher){
+  matcher = matcher === "same_email" ? "Email" : "Phone";
+  var matcher1 = matcher + 1;
+  var matcher2 = matcher + 2;
+  console.log('thisis the matcher', matcher);
+	var fileStream = fs.createReadStream("../grouping/" + file);
 
 	var converter = new Converter({constructResult:true});
 
 	converter.on("end_parsed", function (json) {
 	  var holdObj = {};
 	  var fields = [];
-	    if(json[0].Email){
+	    if(json[0][matcher]){
 	      for(var key in json[0]){
 	        fields.push(key);
 	      }
 	      fields.push('Duplicate');
 			  for(var i = 0; i < json.length; i++){
-	        if(!holdObj[json[i].Email] && holdObj[json[i].Email]!=='undefined'){
-	          holdObj[json[i].Email] = [i];
+	        if(!holdObj[json[i][matcher]] && holdObj[json[i][matcher]]!=='undefined'){
+	          holdObj[json[i][matcher]] = [i];
 	        }else{
-	          if(holdObj[json[i].Email].length===1){
-	            json[holdObj[json[i].Email][0]].Duplicate = json[i].Email;
+	          if(holdObj[json[i][matcher]].length===1){
+	            json[holdObj[json[i][matcher]][0]].Duplicate = json[i][matcher];
 	          }
-	          json[i].Duplicate = json[i].Email;
-	          holdObj[json[i].Email].push(i);
+	          json[i].Duplicate = json[i][matcher];
+	          holdObj[json[i][matcher]].push(i);
 	        }
 	      }
 	    }else{
@@ -40,24 +44,25 @@ function findDups(file, matchingIdentifier){
 	    	}
 	    	fields.push('Duplicate');
 	    	for(var i = 0; i < json.length; i++){
-	        if(!holdObj[json[i].Email1] && holdObj[json[i].Email1]!=='undefined'){
-	          holdObj[json[i].Email1] = [i];
+	        
+	        if(!holdObj[json[i][matcher1]] && holdObj[json[i][matcher1]]!=='undefined'){
+	          holdObj[json[i][matcher1]] = [i];
 	        }else{
-	          if(holdObj[json[i].Email1].length===1){
-	            json[holdObj[json[i].Email1][0]].Duplicate = json[i].Email1;
+	          if(holdObj[json[i][matcher1]].length===1){
+	            json[holdObj[json[i][matcher1]][0]].Duplicate = json[i][matcher1];
 	          }
-	          json[i].Duplicate = json[i].Email1;
-	          holdObj[json[i].Email1].push(i);
+	          json[i].Duplicate = json[i][matcher1];
+	          holdObj[json[i][matcher1]].push(i);
 	        }
-
-	        if(!holdObj[json[i].Email2] && holdObj[json[i].Email2]!=='undefined'){
-	          holdObj[json[i].Email2] = [i];
+	        
+	        if(!holdObj[json[i][matcher2]] && holdObj[json[i][matcher2]]!=='undefined'){
+	          holdObj[json[i][matcher2]] = [i];
 	        }else{
-	          if(holdObj[json[i].Email2].length===1){
-	            json[holdObj[json[i].Email2][0]].Duplicate = json[i].Email2;
+	          if(holdObj[json[i][matcher2]].length===1){
+	            json[holdObj[json[i][matcher2]][0]].Duplicate = json[i][matcher2];
 	          }
-	          json[i].Duplicate = json[i].Email2;
-	          holdObj[json[i].Email2].push(i);
+	          json[i].Duplicate = json[i][matcher2];
+	          holdObj[json[i][matcher2]].push(i);
 	        }
 	      }
 	    }
@@ -65,9 +70,10 @@ function findDups(file, matchingIdentifier){
 	    if (err){
 	      console.log('error converting to csv', err);
 	    } 
+      //overwrite and replace old csv file with new one here
 	    console.log(csv);
 	  });
-	  // console.log(holdObj);
+
 	});
 
 	fileStream.pipe(converter);
