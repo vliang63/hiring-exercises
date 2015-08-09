@@ -14,7 +14,6 @@ function findDups(file, matcher){
   matcher = matcher === "same_email" ? "Email" : "Phone";
   var matcher1 = matcher + 1;
   var matcher2 = matcher + 2;
-  console.log('thisis the matcher', matcher);
 	var fileStream = fs.createReadStream("../grouping/" + file);
 
 	var converter = new Converter({constructResult:true});
@@ -71,7 +70,11 @@ function findDups(file, matcher){
 	      console.log('error converting to csv', err);
 	    } 
       //overwrite and replace old csv file with new one here
-	    console.log(csv);
+      fs.writeFile('../grouping/output/' + file, csv, function(err){
+        if(err){
+	        console.log('error writing csv to output', err);
+        }
+      });
 	  });
 
 	});
