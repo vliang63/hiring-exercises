@@ -4,21 +4,26 @@ var json2csv = require("json2csv");
 
 (function(){
 	var findDups = function (args){
-	  var file = args[2];
-	  var matcher = args[3];
+    var file;
+    var matcher;
+    if(arguments[0]=== null){
+      file = arguments[2];
+      matcher = arguments[3];
+    }else{
+	    file = args[2];
+		  matcher = args[3];
+    }
 		var matcherIndex = {same_email: "Email", same_phone: "Phone"};
 		matcher = matcherIndex[matcher];
-	  console.log("matcher", matcher);
-		if (matcher === "undefined"){
-		  return null;
-		}
 		var matcher1 = matcher + 1;
 		var matcher2 = matcher + 2;
 		var fileStream = fs.createReadStream(file);
-
 		var converter = new Converter({constructResult:true});
 
 		converter.on("end_parsed", function (json) {
+			if (matcher === "undefined"){
+			  return null;
+			}
 		  var holdObj = {};
 		  var fields = [matcher];
 		  var j;
@@ -66,23 +71,26 @@ var json2csv = require("json2csv");
 		        }
 		      }
 		    }
+			
 		  //convert back into csv to write modified contents to a new file
-		  json2csv({ data: json, fields: fields }, function(err, csv) {
+		  json2csv({data: json, fields: fields}, function(err, csv) {
 		    if (err){
 		      console.log("error converting to csv", err);
-		    } 
-		    fs.writeFile("../grouping/output/" + file, csv, function(err){
+		    }
+        var fileNameArray = file.split("/");
+		    fs.writeFile("../grouping/output/" + "output-" + fileNameArray[fileNameArray.length - 1], csv, function(err){
 		      if(err){
 		        console.log("error writing csv to output", err);
 		      }
 		    });
 		  });
-
 		});
 
-		fileStream.pipe(converter);
+    fileStream.pipe(converter);
 
 	};
   module.exports = findDups;
+
   findDups(process.argv);
+
 })();
