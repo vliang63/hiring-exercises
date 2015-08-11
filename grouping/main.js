@@ -2,6 +2,7 @@ var fs = require("fs");
 var Converter = require("csvtojson").Converter;
 var json2csv = require("json2csv");
 
+//code to be run from the command line - 'node main.js [filename] [matching identifier]'
 (function(){
 	var findDups = function (args){
     //handling the way arguments are passed through in Node from the command line
